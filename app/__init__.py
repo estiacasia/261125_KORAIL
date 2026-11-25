@@ -78,7 +78,9 @@ def create_app(test_config=None):
     @app.errorhandler(CSRFError)
     def _csrf_error(e):
         if request.path.startswith("/api"):
-            return jsonify(error={"code": "CSRF_ERROR", "message": "보안 토큰이 만료되었습니다. 새로고침 후 다시 시도해 주세요."}), 400
+            app.logger.warning("CSRF 실패: %s", e.description)
+            return jsonify(error={"code": "CSRF_ERROR", "message": "보안 토큰이 만료되었습니다. 새로고침 후 다시 시도해 주세요.",
+                                  "reason": e.description}), 400
         return e.description, 400
 
     return app
