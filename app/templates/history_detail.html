@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ h.subject }} · 이력{% endblock %}
+{% block lead %}저장된 문서를 다시 복사하거나 같은 설정으로 다시 작성할 수 있습니다.{% endblock %}
+{% block content %}
+<div class="page">
+  <p><a href="{{ url_for('pages.history') }}">← 이력 목록</a></p>
+  <section class="card panel detail">
+    <dl class="kv">
+      <dt>구분</dt><dd>{{ h.label }}</dd>
+      <dt>작성 시각</dt><dd>{{ h.created_at }} · {{ {'copy':'본문 복사','mailto':'메일 앱 열기','draft':'임시 저장'}[h.action] }}{% if h.is_edited %} · 직접 수정본{% endif %}</dd>
+      {% if h.to_name %}<dt>받는 사람</dt><dd>{{ h.to_name }}</dd>{% endif %}
+      {% if h.project_name %}<dt>프로젝트</dt><dd>{{ h.project_name }}</dd>{% endif %}
+    </dl>
+    <div class="subj" style="padding:14px 0;border-top:1px solid var(--line)">
+      <h2>{{ h.subject }}</h2>
+      <button type="button" class="copy sec2" id="cS">제목 복사</button>
+    </div>
+    <pre id="body" style="padding:16px 0;border-top:1px solid var(--line)">{{ h.body }}</pre>
+    <div class="btns" style="margin-top:12px">
+      <button type="button" class="copy pri" id="cB">본문 복사</button>
+      <a class="copy sec2" id="mailto" href="#">메일 앱에서 열기</a>
+      <a class="copy sec2" href="{{ url_for('pages.generator', history=h.id) }}">다시 작성</a>
+      <button type="button" class="star" id="fav" aria-pressed="{{ 'true' if h.is_favorite else 'false' }}" aria-label="즐겨찾기">★</button>
+      <button type="button" class="btn danger" id="del">삭제</button>
+    </div>
+  </section>
+</div>
+<script type="application/json" id="hdata">{{ {'id': h.id, 'subject': h.subject, 'body': h.body, 'to': (h.snapshot.f.get('toEmail') or '') if h.mode == 'email' else ''}|tojson }}</script>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  const { $, api, toast, copy, mailto } = App;
+  const h = JSON.parse($('hdata').textContent);
+  $('mailto').href = mailto(h.to, h.subject, h.body);
+  $('cS').addEventListener('click', e => copy(e.currentTarget, h.subject));
+  $('cB').addEventListener('click', e => copy(e.currentTarget, h.body));
+  $('fav').addEventListener('click', async e => {
+    const b = e.currentTarget, on = b.getAttribute('aria-pressed') !== 'true';
+    try { await api('PATCH', '/api/history/' + h.id, { is_favorite: on }); b.setAttribute('aria-pressed', String(on)); toast(on ? '즐겨찾기에 추가했습니다.' : '즐겨찾기를 해제했습니다.'); }
+    catch (err) { toast(err.message); }
+  });
+  $('del').addEventListener('click', async () => {
+    if (!confirm('이 이력을 삭제할까요? 되돌릴 수 없습니다.')) return;
+    try { await api('DELETE', '/api/history/' + h.id); location.href = '/history'; } catch (err) { toast(err.message); }
+  });
+})();
+</script>
+{% endblock %}

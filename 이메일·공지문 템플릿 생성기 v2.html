@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이메일·공지문 템플릿 생성기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 차분하고 정돈된 실무 도구, 장식 없이 또렷하게
+   IDEA: 왼쪽은 작성 폼, 오른쪽은 실제 메일 작성 창 / 사내 게시판 글
+   PICTURE: 실시간으로 바뀌는 미리보기 자체가 화면의 주인공
+   COLOUR and TYPE: 흰 바탕·연회색 그라운드, 짙은 잉크, 차분한 블루 하나 + 방금 바뀐 값만 연노랑 · Noto Sans KR
+   LAYOUT: 4:6 두 단, 미리보기는 스크롤 시 고정, 860px 이하 세로 배치 */
+:root{color-scheme:light dark;
+  --bg:light-dark(#f5f6f8,#111317);--card:light-dark(#ffffff,#191c21);
+  --ink:light-dark(#1b1f24,#e8eaed);--sub:light-dark(#5f6670,#9aa1ab);
+  --line:light-dark(#e3e6ea,#2a2e35);--soft:light-dark(#f1f3f6,#20242a);
+  --blue:light-dark(#2457d6,#6b96ff);--blue-soft:light-dark(#eaf0ff,#1d2840);
+  --mark:light-dark(#e3ecff,#22304f);--hot:light-dark(#fff0b3,#5b4a10);
+  --ph:light-dark(#9aa1ab,#68707b);--ok:#1f9d55}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Noto Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;overflow-x:clip}
+button{font:inherit;color:inherit}
+button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+header{background:var(--card);border-bottom:1px solid var(--line);padding:14px max(4vw,16px)}
+header .in{max-width:1280px;margin:0 auto;display:flex;align-items:center;gap:12px 20px;flex-wrap:wrap}
+h1{font-size:20px;line-height:1.2;margin:0;font-weight:700;letter-spacing:-.01em}
+header p{margin:0;color:var(--sub);font-size:14px;flex:1 1 260px}
+.modes{display:flex;background:var(--soft);border-radius:10px;padding:4px;gap:4px}
+.modes button{border:0;background:transparent;min-height:40px;padding:0 20px;border-radius:7px;cursor:pointer;color:var(--sub);font-size:15px}
+.modes button[aria-pressed=true]{background:var(--card);color:var(--ink);font-weight:700;box-shadow:0 1px 3px rgba(16,24,40,.12)}
+main{max-width:1280px;margin:0 auto;padding:22px max(4vw,16px) 56px;display:grid;grid-template-columns:minmax(0,4fr) minmax(0,6fr);gap:22px;align-items:start}
+.col{display:grid;gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 1px 2px rgba(16,24,40,.04),0 4px 16px rgba(16,24,40,.04)}
+.form{padding:20px}
+.sec+.sec{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+.lab{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:500;color:var(--sub);margin-bottom:8px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font-size:14px;min-height:40px;padding:0 13px;border-radius:8px;border:1px solid var(--line);background:var(--card);cursor:pointer}
+.seg button:hover{background:var(--soft)}
+.seg button[aria-pressed=true]{background:var(--blue-soft);border-color:var(--blue);color:var(--blue);font-weight:500}
+.pill{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));background:var(--soft);border-radius:10px;padding:4px;gap:4px}
+.pill button{font-size:14px;min-height:42px;border:0;border-radius:7px;background:transparent;color:var(--sub);cursor:pointer;line-height:1.25;padding:4px 6px}
+.pill button[aria-pressed=true]{background:var(--card);color:var(--ink);font-weight:500;box-shadow:0 1px 3px rgba(16,24,40,.12)}
+.f{display:block}.f+.f,.row2+.f,.f+.row2,.row2+.row2{margin-top:12px}
+.f>span{display:block;font-size:13px;font-weight:500;color:var(--sub);margin-bottom:5px}
+.f small,.lab small{font-weight:400;color:var(--ph)}
+input:not([type=checkbox]),textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px 11px;min-height:44px;transition:border-color .15s,box-shadow .15s}
+textarea{resize:vertical;min-height:96px;line-height:1.6}
+input:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cand{display:grid;grid-template-columns:22px minmax(0,1.3fr) minmax(0,1fr) 40px;gap:8px;align-items:center}
+.cand+.cand{margin-top:8px}
+.cand b{font-size:13px;color:var(--sub);text-align:center}
+.x{width:40px;height:40px;border:1px solid var(--line);background:var(--card);border-radius:8px;cursor:pointer;color:var(--sub);font-size:18px}
+.add{margin-top:8px;border:1px dashed var(--line);background:none;border-radius:8px;min-height:40px;width:100%;cursor:pointer;color:var(--blue);font-size:14px}
+.add:hover{background:var(--blue-soft)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{font-size:13.5px;min-height:36px;padding:0 13px;border-radius:99px;border:1px solid var(--line);background:var(--card);cursor:pointer;color:var(--sub)}
+.chips button::before{content:"+ "}
+.chips button[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:#fff}
+.chips button[aria-pressed=true]::before{content:"✓ "}
+.tg+.tg{margin-top:10px}
+.sw{display:flex;align-items:center;gap:10px;min-height:40px;cursor:pointer;font-size:15px}
+.sw input{appearance:none;-webkit-appearance:none;flex:none;width:42px;height:24px;margin:0;border-radius:99px;background:var(--line);position:relative;cursor:pointer;transition:background .15s}
+.sw input::before{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+.sw input:checked{background:var(--blue)}.sw input:checked::before{transform:translateX(18px)}
+.sw input:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.sw small{color:var(--ph);font-size:13px}
+.tgx{margin:6px 0 0 52px}
+details{border:1px solid var(--line);border-radius:10px;padding:0 14px}
+summary{cursor:pointer;min-height:44px;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"⌄";margin-left:auto;color:var(--sub)}
+details[open] summary::after{content:"⌃"}
+summary span{font-weight:400;color:var(--sub);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+details .in{padding:2px 0 14px}
+.note{font-size:13px;color:var(--sub);margin:10px 0 0}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:18px;font-size:13px;color:var(--sub)}
+.ghost{font-size:13px;background:none;border:1px solid var(--line);color:var(--sub);border-radius:8px;min-height:36px;padding:0 12px;cursor:pointer}
+.ghost:hover{color:var(--ink);background:var(--soft)}
+.preview{position:sticky;top:14px;overflow:hidden}
+.bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px 10px 18px;border-bottom:1px solid var(--line);background:var(--soft);font-size:13px;color:var(--sub)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--blue)}
+.bar b{color:var(--ink);font-weight:500}
+.tag{font-size:12px;padding:3px 9px;border-radius:99px;background:var(--card);border:1px solid var(--line);white-space:nowrap}
+.bar .sp{flex:1}
+.tool{font-size:13.5px;min-height:36px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);cursor:pointer;white-space:nowrap}
+.tool:hover{background:var(--blue-soft);border-color:var(--blue);color:var(--blue)}
+.tool:disabled{opacity:.45;cursor:not-allowed;background:var(--card);border-color:var(--line);color:inherit}
+.shuf{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:9px 18px;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--sub)}
+.shuf button{font-size:12.5px;min-height:30px;padding:0 10px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--sub);cursor:pointer}
+.shuf button::after{content:" ↻"}
+.shuf button:hover:not(:disabled){color:var(--blue);border-color:var(--blue)}
+.shuf button:disabled{opacity:.45;cursor:not-allowed}
+.meta{padding:12px 22px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:72px minmax(0,1fr);gap:4px 10px;font-size:14px}
+.meta dt{color:var(--sub)}.meta dd{margin:0;overflow-wrap:anywhere}
+.banner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 22px;background:var(--hot);font-size:13.5px}
+.banner span{flex:1}
+.subj{display:flex;align-items:flex-start;gap:12px;padding:14px 22px;border-bottom:1px solid var(--line)}
+.subj h2{flex:1;margin:0;font-size:18px;line-height:1.45;font-weight:700;overflow-wrap:anywhere}
+.subj input{flex:1;font-weight:700}
+.body{padding:18px 22px 6px;font-size:15.5px;line-height:1.8;white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;min-height:360px}
+#eBody{display:block;width:calc(100% - 28px);margin:14px;min-height:420px;font-size:15.5px;line-height:1.8;border-style:dashed}
+mark{background:var(--mark);color:inherit;border-radius:3px;padding:0 2px}
+mark.hot{animation:hot 1.5s ease-out}
+@keyframes hot{0%,45%{background:var(--hot)}100%{background:var(--mark)}}
+.ph{color:var(--ph);background:var(--soft);border-radius:3px;padding:0 3px}
+.acts{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;padding:14px 22px 6px}
+.copy{font-size:14px;font-weight:500;min-height:42px;padding:0 16px;border-radius:8px;cursor:pointer;border:1px solid var(--blue);white-space:nowrap;transition:background .15s,color .15s;text-decoration:none;display:inline-flex;align-items:center}
+.copy.pri{background:var(--blue);color:#fff}
+.copy.sec2{background:var(--card);color:var(--blue)}
+.copy.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.hint{margin:0;padding:0 22px 16px;text-align:right;font-size:12.5px;color:var(--ph)}
+.lib{padding:16px 18px 18px}
+.lib .pill{margin-bottom:12px}
+.list{display:grid;gap:6px}
+.item{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:9px;padding:4px 4px 4px 12px}
+.item:hover{background:var(--soft)}
+.item .go{flex:1;text-align:left;background:none;border:0;cursor:pointer;padding:6px 0;min-height:40px}
+.item .go b{display:block;font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .go span{font-size:12.5px;color:var(--sub)}
+.empty{font-size:13.5px;color:var(--sub);padding:14px;text-align:center;background:var(--soft);border-radius:9px;margin:0}
+.save{display:flex;gap:8px;margin-bottom:10px}
+.save button{flex:none;min-height:44px;padding:0 14px;border-radius:8px;border:1px solid var(--blue);background:var(--blue);color:#fff;cursor:pointer;font-size:14px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#1b1f24;color:#fff;padding:10px 12px 10px 16px;border-radius:10px;font-size:14px;display:flex;align-items:center;gap:12px;transition:opacity .2s,transform .2s;z-index:9;box-shadow:0 8px 24px rgba(0,0,0,.2);max-width:calc(100vw - 32px)}
+.toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast button{background:none;border:0;color:#9db8ff;font-weight:700;cursor:pointer;min-height:32px}
+[hidden]{display:none!important}
+@media(prefers-reduced-motion:reduce){mark.hot{animation:none;background:var(--hot)}*{transition:none!important}}
+@media(max-width:860px){main{grid-template-columns:minmax(0,1fr)}.preview{position:static}}
+@media(max-width:440px){.row2{grid-template-columns:1fr}.subj{flex-direction:column}.subj input{width:100%}.body{min-height:0}.tgx{margin-left:0}.modes{width:100%}.modes button{flex:1}.acts .copy{flex:1;justify-content:center}}
+</style>
+</head>
+<body>
+<header><div class="in">
+  <h1>이메일·공지문 템플릿 생성기</h1>
+  <p>핵심 키워드만 넣으면 상황·대상·톤에 맞는 비즈니스 메일과 사내 공지가 바로 완성됩니다.</p>
+  <div class="modes" id="modes" role="group" aria-label="작성 모드">
+    <button type="button" data-mode="email">이메일</button>
+    <button type="button" data-mode="notice">공지문</button>
+  </div>
+</div></header>
+
+<main>
+<div class="col">
+  <section class="card form" id="form" aria-label="작성 폼">
+    <div class="sec">
+      <div class="lab">상황</div>
+      <div class="seg" id="sitSeg" role="group" aria-label="상황"></div>
+    </div>
+    <div class="sec" id="audWrap">
+      <div class="lab">수신 대상</div>
+      <div class="pill" id="audSeg" role="group" aria-label="수신 대상">
+        <button type="button" data-aud="ext">외부 거래처</button>
+        <button type="button" data-aud="dept">타 부서 협업</button>
+        <button type="button" data-aud="team">사내 팀원</button>
+      </div>
+    </div>
+    <div class="sec" id="fmtWrap">
+      <div class="lab">게시 채널</div>
+      <div class="pill" role="group" aria-label="게시 채널">
+        <button type="button" data-fmt="board">사내 게시판</button>
+        <button type="button" data-fmt="slack">슬랙</button>
+        <button type="button" data-fmt="kakao">카카오톡</button>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="lab">톤앤매너</div>
+      <div class="pill" role="group" aria-label="톤">
+        <button type="button" data-tone="formal">정중하고 격식 있는 톤</button>
+        <button type="button" data-tone="brief">간결하고 실무적인 톤</button>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="lab">내용 입력</div>
+      <div id="fields"></div>
+    </div>
+    <div class="sec">
+      <div class="lab">포함할 내용 <small>누를 때마다 문장이 추가·제거됩니다</small></div>
+      <div class="chips" id="chips"></div>
+    </div>
+    <div class="sec">
+      <div class="lab">실무 옵션</div>
+      <div class="tg">
+        <label class="sw"><input type="checkbox" data-tg="attach" id="tgAttach"><span>첨부파일 있음</span></label>
+        <div class="tgx" data-show="attach"><input id="filesIn" data-k="files.email" data-tok="files" placeholder="파일명 (여러 개는 쉼표로 구분)" aria-label="첨부 파일명" autocomplete="off"></div>
+      </div>
+      <div class="tg" id="tgDue">
+        <label class="sw"><input type="checkbox" data-tg="due"><span>회신 기한 강조</span></label>
+        <div class="tgx" data-show="due"><input type="date" data-k="due" data-tok="due" aria-label="회신 기한"></div>
+      </div>
+      <div class="tg">
+        <label class="sw"><input type="checkbox" data-tg="sig"><span>내 서명 자동 삽입</span></label>
+      </div>
+    </div>
+    <div class="sec">
+      <details id="sigBox">
+        <summary>내 정보·서명 <span id="sigSum"></span></summary>
+        <div class="in">
+          <div class="row2">
+            <label class="f"><span>이름</span><input data-sig="name" placeholder="예: 이지은" autocomplete="name"></label>
+            <label class="f"><span>직함</span><input data-sig="title" placeholder="예: 매니저"></label>
+          </div>
+          <div class="row2">
+            <label class="f"><span>소속 부서</span><input data-sig="dept" placeholder="예: 마케팅팀"></label>
+            <label class="f"><span>회사명</span><input data-sig="company" placeholder="예: (주)회사명" autocomplete="organization"></label>
+          </div>
+          <div class="row2">
+            <label class="f"><span>연락처</span><input data-sig="phone" type="tel" placeholder="010-0000-0000" autocomplete="tel"></label>
+            <label class="f"><span>이메일</span><input data-sig="email" type="email" placeholder="me@company.com" autocomplete="email"></label>
+          </div>
+          <p class="note">한 번 입력하면 이 브라우저에 저장되어 다음에도 그대로 쓰입니다. 인사말의 보내는 사람 이름과 공지문 발신 부서에도 사용됩니다.</p>
+        </div>
+      </details>
+    </div>
+    <div class="foot"><span>처음에는 예시 값이 채워져 있습니다.</span><button type="button" class="ghost" id="clear">입력값 모두 지우기</button></div>
+  </section>
+
+  <section class="card lib" aria-label="최근 기록과 프리셋">
+    <div class="pill" role="group" aria-label="보관함">
+      <button type="button" data-lib="recent">최근 기록</button>
+      <button type="button" data-lib="preset">프리셋</button>
+    </div>
+    <div id="libBody"></div>
+  </section>
+</div>
+
+<section class="card preview" aria-label="미리보기">
+  <div class="bar">
+    <span class="dot"></span><b>실시간 미리보기</b><span class="tag" id="tag"></span><span class="sp"></span>
+    <button type="button" class="tool" id="dice" title="같은 조건에서 다른 표현으로 다시 만듭니다">🎲 문구 새로고침</button>
+    <button type="button" class="tool" id="editBtn">직접 수정</button>
+  </div>
+  <div class="shuf" id="shuf"><span>문단별 바꾸기</span></div>
+  <dl class="meta" id="meta"></dl>
+  <div class="banner" id="banner" hidden><span>직접 수정 중입니다. 왼쪽 입력을 바꿔도 이 내용은 유지되며, 복사·메일 열기에 수정본이 쓰입니다.</span><button type="button" class="ghost" id="resetBtn">초기화</button></div>
+  <div class="subj">
+    <h2 id="subj"></h2>
+    <input id="eSubj" hidden aria-label="제목 직접 수정">
+    <button type="button" class="copy sec2" id="cS">제목 복사</button>
+  </div>
+  <div class="body" id="body" aria-live="polite"></div>
+  <textarea id="eBody" hidden aria-label="본문 직접 수정"></textarea>
+  <div class="acts">
+    <a class="copy sec2" id="mailto" href="mailto:">메일 앱에서 열기</a>
+    <button type="button" class="copy pri" id="cB">본문 복사</button>
+  </div>
+  <p class="hint">본문 복사·메일 열기 시 최근 기록에 자동 저장됩니다. 메일 앱이 열리지 않으면 복사해서 붙여 넣으세요.</p>
+</section>
+</main>
+<div class="toast" id="toast" role="status"><span id="toastMsg"></span><button type="button" id="toastAct" hidden></button></div>
+
+<script type="application/json" id="tpl">
+{
+"season":{"1":"추운 날씨에 건강 유의하시기 바랍니다.","2":"추운 날씨에 건강 유의하시기 바랍니다.","3":"완연한 봄기운이 느껴지는 요즘입니다.","4":"완연한 봄기운이 느껴지는 요즘입니다.","5":"싱그러운 계절, 활기찬 나날 보내고 계시리라 믿습니다.","6":"무더운 날씨에 건강 유의하시기 바랍니다.","7":"무더운 날씨에 건강 유의하시기 바랍니다.","8":"무더운 날씨에 건강 유의하시기 바랍니다.","9":"선선한 가을바람이 반가운 요즘입니다.","10":"선선한 가을바람이 반가운 요즘입니다.","11":"부쩍 쌀쌀해진 날씨에 건강 유의하시기 바랍니다.","12":"추운 날씨에 건강 유의하시기 바랍니다."},
+"aud":{"ext":{"name":"외부 거래처","defTo":"담당자님"},"dept":{"name":"타 부서 협업","defTo":"담당자님"},"team":{"name":"사내 팀원","defTo":"팀원 여러분"}},
+"greet":{
+ "ext":{"formal":["{to}께,\n\n안녕하십니까. {sender}입니다.\n%s% 귀사의 무궁한 발전을 기원합니다.","{to}께,\n\n안녕하십니까, {sender}입니다.\n평소 각별한 관심과 협조를 보내주셔서 진심으로 감사드립니다.","{to}께,\n\n안녕하십니까. {sender}입니다.\n%s%","{to}께,\n\n안녕하십니까. {sender}입니다.\n늘 귀사의 협조에 깊이 감사드립니다."],
+        "brief":["{to}, 안녕하세요.\n{sender}입니다.","{to}, 안녕하세요. {sender}입니다.","안녕하세요, {to}.\n{sender}입니다."]},
+ "dept":{"formal":["{to}께,\n\n안녕하세요. {sender}입니다.\n늘 원활한 협업에 힘써 주셔서 감사합니다.","{to}께,\n\n안녕하세요, {sender}입니다.\n바쁘신 와중에도 항상 협조해 주셔서 감사드립니다.","{to}께,\n\n안녕하세요. {sender}입니다.\n%s%"],
+         "brief":["{to}, 안녕하세요. {sender}입니다.","{to}, 안녕하세요.\n{sender}입니다. 늘 협조 감사합니다.","안녕하세요 {to}, {sender}입니다."]},
+ "team":{"formal":["{to}, 안녕하세요.\n{sender}입니다. 다들 고생 많으십니다.","{to}, 안녕하세요. {sender}입니다.\n바쁜 와중에도 늘 애써 주셔서 고맙습니다.","{to}, 안녕하세요. {sender}입니다.\n%s%"],
+         "brief":["{to}, 안녕하세요! {sender}입니다.","{to}, {sender}입니다.","안녕하세요 {to}, {sender}입니다."]}
+},
+"close":{
+ "ext":{"formal":["바쁘신 와중에 번거롭게 해 드려 송구하오며, 앞으로도 변함없는 협조 부탁드립니다.\n\n감사합니다.\n{sender} 드림","귀사의 무궁한 발전을 기원합니다.\n\n감사합니다.\n{sender} 드림","앞으로도 좋은 협력 관계를 이어갈 수 있기를 바랍니다.\n\n{sender} 올림","늘 보내주시는 협조에 다시 한번 감사드립니다.\n\n감사합니다.\n{sender} 드림"],
+        "brief":["감사합니다.\n\n{sender} 드림","늘 협조해 주셔서 감사합니다.\n\n{sender} 드림","좋은 하루 보내세요.\n감사합니다.\n\n{sender} 드림"]},
+ "dept":{"formal":["함께 잘 마무리할 수 있도록 하겠습니다.\n\n감사합니다.\n{sender} 드림","늘 도와주셔서 감사합니다.\n\n{sender} 드림","추가로 필요하신 내용이 있으면 언제든 말씀해 주세요.\n\n감사합니다.\n{sender} 드림"],
+         "brief":["감사합니다.\n{sender} 드림","늘 협조 감사합니다.\n{sender} 드림","문의는 메신저로 편하게 주세요.\n감사합니다.\n{sender} 드림"]},
+ "team":{"formal":["궁금한 점 있으면 편하게 말씀해 주세요.\n고맙습니다.\n\n{sender} 드림","다들 바쁘겠지만 함께 잘 챙겨 주세요. 고맙습니다.\n\n{sender} 드림","의견 있으면 언제든 공유 부탁드려요.\n\n{sender} 드림"],
+         "brief":["고맙습니다!\n{sender}","질문은 편하게 주세요.\n{sender}","오늘도 수고 많으세요.\n{sender}"]}
+},
+"opt":{
+ "attach":{"formal":"관련 자료를 첨부드리오니 확인 부탁드립니다.","brief":"관련 자료 첨부드립니다. 확인 부탁드립니다."},
+ "files":"· 첨부: {files}",
+ "due":{"formal":"바쁘시겠지만 {due}까지 회신 부탁드립니다.","brief":"{due}까지 회신 부탁드립니다."},
+ "nAttach":{"formal":"※ 자세한 내용은 첨부 파일을 참고해 주시기 바랍니다.","brief":"※ 첨부 파일 참고 부탁드립니다."},
+ "nFiles":"※ 첨부 파일: {files}"
+},
+"emailFields":{
+ "to":{"l":"수신자명","ph":"예: 김민수 팀장님","half":1},
+ "toEmail":{"l":"수신자 이메일","sub":"선택","type":"email","ph":"name@company.com","half":1},
+ "proj":{"l":"프로젝트명","ph":"예: 2027 브랜드 리뉴얼"},
+ "oldDate":{"l":"기존 마감일","type":"date","half":1},
+ "newDate":{"l":"변경 예정일","type":"date","half":1},
+ "mDate":{"l":"미팅 날짜","type":"date","half":1,"tok":"when"},
+ "mTime":{"l":"시간","type":"time","half":1,"tok":"when"},
+ "place":{"l":"장소","ph":"예: 본사 3층 대회의실"},
+ "link":{"l":"화상회의 링크","sub":"Zoom, Teams 등","type":"url","ph":"https://"}
+},
+"email":{
+ "order":["schedule","request","delay","remind","coop"],
+ "sits":{
+  "schedule":{"name":"일정 조율","fields":["cands"],"memoMode":"opt","memoName":"추가 전달 사항","memoLabel":"추가 전달 사항","memoSub":"선택","memoPh":"예: 1차 시안 리뷰가 주요 안건입니다.",
+   "subj":{"formal":["[{proj}] 일정 조율 요청의 건","[{proj}] 미팅 일정 협의 요청드립니다","[{proj}] 회의 일정 문의드립니다"],"brief":["[{proj}] 일정 조율 요청","[{proj}] 미팅 가능 일정 문의","[{proj}] 일정 확인 부탁드립니다"]},
+   "intro":{"formal":["다름이 아니오라 {proj} 진행과 관련하여 일정을 조율하고자 연락드렸습니다.","{proj} 관련 미팅 일정을 협의드리고자 메일 드립니다.","{proj} 건으로 직접 논의드릴 사항이 있어 일정 조율을 요청드립니다."],"brief":["{proj} 관련 일정 조율 요청드립니다.","{proj} 건으로 미팅 일정 잡고자 연락드립니다.","{proj} 관련해서 일정 확인 부탁드립니다."]},
+   "core":{"formal":["가능하시다면 {cands}에 시간을 내어 주실 수 있을지 여쭙고자 합니다.","혹시 {cands}에 뵐 수 있을지 확인 부탁드립니다.","{cands}에 미팅이 가능하실지 여쭙습니다."],"brief":["{cands} 가능하신지 확인 부탁드립니다.","{cands} 어떠실까요?","{cands}에 가능하실까요?"]},
+   "coreMulti":{"formal":["아래 일정 중 가능하신 때를 알려주시면 감사하겠습니다.\n{cands}","가능하시다면 다음 후보 일정 중 편하신 시간으로 회신 부탁드립니다.\n{cands}","아래 후보 일정 중 괜찮으신 때를 알려주시면 맞추어 준비하겠습니다.\n{cands}"],"brief":["아래 중 가능한 일정 알려주세요.\n{cands}","후보 일정입니다. 편하신 시간 회신 부탁드립니다.\n{cands}","아래 일정 중 선택 부탁드립니다.\n{cands}"]},
+   "chips":[{"id":"alt","label":"대안 일정 요청","on":1,"formal":"제안드린 일정이 어려우시면 편하신 일정을 알려주시면 최대한 맞추겠습니다.","brief":"어려우시면 가능한 일정 알려주세요."},
+            {"id":"online","label":"화상회의 가능","formal":"대면 미팅이 어려우시면 화상회의로 진행하는 것도 가능합니다.","brief":"화상회의도 가능합니다."},
+            {"id":"dur","label":"소요 시간 안내","formal":"미팅은 1시간 내외로 진행될 예정입니다.","brief":"1시간 정도 예상합니다."},
+            {"id":"agenda","label":"안건 사전 공유","formal":"논의 안건은 일정 확정 후 미리 공유드리겠습니다.","brief":"안건은 확정 후 공유드릴게요."}],
+   "closeLead":{"formal":["회신 주시는 대로 일정을 확정하여 다시 안내드리겠습니다.","일정이 확정되면 세부 사항을 정리해 공유드리겠습니다.","검토 후 편하실 때 회신 부탁드립니다."],"brief":["회신 기다리겠습니다.","확정되면 다시 공유드릴게요.","편하실 때 회신 주세요."]}},
+  "request":{"name":"견적/자료 요청","fields":[],"memoMode":"core","memoName":"요청 항목","memoLabel":"요청 항목","memoPh":"예:\n- 단가 견적서 (수량 500개 기준)\n- 제품 사양서",
+   "subj":{"formal":["[{proj}] 견적 및 관련 자료 요청드립니다","[{proj}] 자료 요청의 건","[{proj}] 검토 자료 송부 요청"],"brief":["[{proj}] 견적/자료 요청","[{proj}] 자료 요청드립니다","[{proj}] 검토 자료 부탁드립니다"]},
+   "intro":{"formal":["{proj} 검토를 위하여 견적서 및 관련 자료를 요청드리고자 연락드렸습니다.","{proj} 진행에 앞서 몇 가지 자료를 요청드리고자 메일 드립니다.","{proj} 관련하여 내부 검토에 필요한 자료를 요청드립니다."],"brief":["{proj} 관련 자료 요청드립니다.","{proj} 검토용 견적과 자료 요청드립니다.","{proj} 건으로 자료 부탁드립니다."]},
+   "core":{"formal":["요청드리는 내용은 아래와 같습니다.\n{memo}","검토에 필요한 자료는 다음과 같습니다.\n{memo}","아래 항목을 전달해 주시면 감사하겠습니다.\n{memo}"],"brief":["요청 항목은 아래와 같습니다.\n{memo}","필요한 자료입니다.\n{memo}","아래 내용 부탁드립니다.\n{memo}"]},
+   "chips":[{"id":"purpose","label":"사용 목적 설명","on":1,"formal":"요청드린 자료는 내부 검토 및 의사결정 목적으로만 활용하겠습니다.","brief":"내부 검토용으로만 사용합니다."},
+            {"id":"format","label":"파일 형식 지정","formal":"가능하시다면 PDF 또는 엑셀 파일로 전달해 주시면 감사하겠습니다.","brief":"PDF나 엑셀로 주시면 좋겠습니다."},
+            {"id":"contact","label":"담당자 안내 요청","formal":"자료 관련해 문의드릴 수 있는 담당자분도 함께 알려주시면 감사하겠습니다.","brief":"담당자 연락처도 함께 부탁드립니다."},
+            {"id":"nda","label":"보안 유지 약속","formal":"전달해 주신 자료는 외부로 유출되지 않도록 철저히 관리하겠습니다.","brief":"자료는 보안 유지하겠습니다."}],
+   "closeLead":{"formal":["자료 준비에 번거로우시겠지만 협조 부탁드립니다.","궁금하신 점이 있으시면 언제든 말씀해 주십시오.","전달해 주신 자료는 꼼꼼히 검토하여 회신드리겠습니다."],"brief":["확인 부탁드립니다.","검토 후 회신드리겠습니다.","준비되는 대로 보내주세요."]}},
+  "delay":{"name":"지연 사과","fields":["oldDate","newDate"],"memoMode":"chip","memoName":"지연 사유","memoLabel":"지연 사유","memoPh":"예: 원자재 수급이 늦어지면서 생산 일정이 1주가량 밀렸습니다.",
+   "subj":{"formal":["[{proj}] 일정 지연에 대해 사과 말씀 드립니다","[{proj}] 납기 일정 변경 안내 및 사과","[{proj}] 일정 조정 관련 양해 부탁드립니다"],"brief":["[{proj}] 일정 지연 안내 및 사과","[{proj}] 완료 일정 변경 안내","[{proj}] 일정 변경 ({newDate})"]},
+   "intro":{"formal":["먼저 {proj} 진행 과정에서 약속드린 일정을 지키지 못하게 된 점 깊이 사과드립니다.","{proj} 일정과 관련하여 송구한 말씀을 드리고자 연락드렸습니다.","{proj} 일정이 지연되어 불편을 드리게 된 점 진심으로 사과드립니다."],"brief":["{proj} 일정이 지연되어 죄송합니다.","{proj} 일정 지연 건으로 연락드립니다.","{proj} 일정 변경 안내드립니다. 불편 드려 죄송합니다."]},
+   "core":{"formal":["당초 {oldDate}까지 전달드리기로 하였으나, 부득이하게 {newDate}로 일정을 조정하게 되었습니다.","기존 마감일인 {oldDate}에서 {newDate}로 완료 일정이 변경될 예정입니다.","약속드린 {oldDate} 일정을 맞추지 못해, {newDate}까지 완료하는 것으로 조정하고자 합니다."],"brief":["일정이 {oldDate}에서 {newDate}로 조정됩니다.","마감이 {oldDate}에서 {newDate}로 변경됩니다.","완료 예정일은 {newDate}입니다. (기존 {oldDate})"]},
+   "chips":[{"id":"cause","label":"원인 간략 설명 포함","on":1,"formal":"지연 사유는 다음과 같습니다.\n{memo}","brief":"사유\n{memo}"},
+            {"id":"emph","label":"변경된 일정 강조","on":1,"formal":"▶ 변경 완료 예정일: {newDate}\n위 일정은 반드시 지킬 수 있도록 최선을 다하겠습니다.","brief":"▶ 변경 예정일: {newDate}\n이 일정은 꼭 지키겠습니다."},
+            {"id":"prevent","label":"재발 방지 약속","formal":"앞으로 같은 일이 반복되지 않도록 일정 관리 체계를 점검하고 보완하겠습니다.","brief":"재발하지 않도록 일정 관리 철저히 하겠습니다."},
+            {"id":"share","label":"진행 상황 공유","formal":"진행 상황은 중간중간 공유드려 걱정을 덜어 드리겠습니다.","brief":"진행 상황은 수시로 공유드리겠습니다."}],
+   "closeLead":{"formal":["다시 한번 불편을 드린 점 깊이 사과드리며, 너그러운 양해 부탁드립니다.","기다려 주시는 만큼 더 완성도 있는 결과로 보답하겠습니다.","심려를 끼쳐 드린 점 거듭 사과드립니다."],"brief":["다시 한번 죄송합니다.","양해 부탁드립니다.","불편 드려 죄송합니다."]}},
+  "remind":{"name":"미팅 리마인드","fields":["mDate","mTime","place","link"],"memoMode":"chip","memoName":"안건","memoLabel":"안건 / 참고 사항","memoPh":"예:\n- 1차 시안 리뷰\n- 일정 및 역할 분담 확정",
+   "subj":{"formal":["[{proj}] 미팅 일정 안내드립니다","[리마인드] {proj} 미팅 안내","[{proj}] 미팅 참석 안내 ({when})"],"brief":["[리마인드] {proj} 미팅 – {when}","[{proj}] 미팅 리마인드","{proj} 미팅 안내 ({when})"]},
+   "intro":{"formal":["{when}에 예정된 {proj} 미팅 일정을 다시 한번 안내드립니다.","다가오는 {proj} 미팅 관련하여 리마인드 차 연락드렸습니다.","{proj} 미팅이 곧 다가와 미리 안내드립니다."],"brief":["{when} {proj} 미팅 리마인드 드립니다.","{proj} 미팅 안내드립니다.","다가오는 {proj} 미팅 리마인드입니다."]},
+   "core":{"formal":["미팅 정보는 아래와 같습니다.","세부 사항을 다시 한번 정리해 드립니다.","참석에 참고하실 수 있도록 일정을 공유드립니다."],"brief":["미팅 정보입니다.","아래 참고 부탁드립니다.","세부 사항 공유드립니다."]},
+   "chips":[{"id":"agenda","label":"안건 포함","on":1,"formal":"논의 안건은 다음과 같습니다.\n{memo}","brief":"안건\n{memo}"},
+            {"id":"prep","label":"사전 자료 검토 요청","formal":"원활한 논의를 위해 관련 자료를 미리 검토해 주시면 감사하겠습니다.","brief":"관련 자료 미리 확인 부탁드립니다."},
+            {"id":"rsvp","label":"참석 여부 회신 요청","formal":"참석 가능 여부를 회신해 주시면 준비에 참고하겠습니다.","brief":"참석 여부 회신 부탁드립니다."},
+            {"id":"change","label":"변동 시 연락 요청","on":1,"formal":"일정에 변동이 있으시면 미리 말씀해 주십시오.","brief":"변동 있으면 미리 알려주세요."}],
+   "closeLead":{"formal":["귀한 시간 내어 주셔서 감사드리며, 당일 뵙겠습니다.","당일 원활한 진행을 위해 꼼꼼히 준비하겠습니다.","참석에 다시 한번 감사드립니다."],"brief":["그날 뵙겠습니다.","당일 뵐게요.","참석 감사합니다."]}},
+  "coop":{"name":"업무 협조 요청","fields":[],"memoMode":"core","memoName":"협조 요청 내용","memoLabel":"협조 요청 내용","memoPh":"예:\n- 랜딩 페이지 QA 인력 2명 지원\n- 12월 둘째 주 테스트 일정 공유",
+   "subj":{"formal":["[{proj}] 업무 협조 요청의 건","[{proj}] 협조 요청드립니다","[{proj}] 업무 지원 요청"],"brief":["[{proj}] 업무 협조 요청","[{proj}] 협조 부탁드립니다","[{proj}] 지원 요청"]},
+   "intro":{"formal":["{proj} 진행과 관련하여 협조를 요청드리고자 연락드렸습니다.","{proj} 건으로 도움을 요청드리고자 메일 드립니다.","원활한 {proj} 진행을 위해 협조를 부탁드리고자 합니다."],"brief":["{proj} 관련 협조 요청드립니다.","{proj} 건으로 요청드릴 사항이 있습니다.","{proj} 진행 위해 협조 부탁드립니다."]},
+   "core":{"formal":["요청드리는 사항은 아래와 같습니다.\n{memo}","구체적인 협조 요청 내용은 다음과 같습니다.\n{memo}","아래 사항에 대해 협조해 주시면 감사하겠습니다.\n{memo}"],"brief":["요청 사항입니다.\n{memo}","아래 내용 부탁드립니다.\n{memo}","협조 요청 내용\n{memo}"]},
+   "chips":[{"id":"bg","label":"배경 설명 포함","on":1,"formal":"이번 요청은 {proj} 일정을 안정적으로 맞추기 위해 꼭 필요한 사항입니다.","brief":"{proj} 일정 맞추려면 꼭 필요한 부분입니다."},
+            {"id":"benefit","label":"기대 효과 언급","formal":"협조해 주시면 양측 모두 업무 효율을 높일 수 있을 것으로 기대합니다.","brief":"협조해 주시면 일정 단축에 큰 도움이 됩니다."},
+            {"id":"meet","label":"짧은 미팅 제안","formal":"필요하시면 짧게 미팅을 잡아 자세히 설명드리겠습니다.","brief":"필요하면 짧게 미팅하시죠."},
+            {"id":"person","label":"담당자 연결 요청","formal":"해당 업무 담당자분을 알려주시면 직접 연락드리겠습니다.","brief":"담당자 알려주시면 직접 연락드릴게요."}],
+   "closeLead":{"formal":["바쁘신 중에 부탁드리게 되어 송구합니다.","추가로 필요하신 자료가 있으면 즉시 준비하겠습니다.","긍정적인 검토 부탁드립니다."],"brief":["검토 부탁드립니다.","어려운 점 있으면 말씀해 주세요.","협조 부탁드립니다."]}}
+ }
+},
+"notice":{
+ "order":["internal","recruit","maint","holiday"],
+ "fmtName":{"board":"사내 게시판","slack":"슬랙","kakao":"카카오톡"},
+ "greet":{"formal":["임직원 여러분, 안녕하십니까.","안녕하십니까, {issuer}입니다.","구성원 여러분, 안녕하십니까. {issuer}입니다."],"brief":["안녕하세요.","안녕하세요, {issuer}입니다.","모두 안녕하세요!"]},
+ "lead":{"formal":["- 아    래 -","자세한 내용은 아래와 같습니다.","[세부 안내]"],"brief":["[세부 내용]","아래 내용 확인해 주세요.","[상세 안내]"]},
+ "close":{"formal":["업무에 참고하시기 바랍니다. 감사합니다.","임직원 여러분의 많은 협조 부탁드립니다. 감사합니다.","문의 사항은 위 문의처로 연락 주시기 바랍니다. 감사합니다."],"brief":["참고 부탁드립니다.","협조 부탁드립니다. 감사합니다!","궁금한 점은 문의처로 연락 주세요."]},
+ "sits":{
+  "internal":{"name":"사내 안내","when":"dt","whenLabel":"일시",
+   "fields":[{"k":"nTitle","l":"안내 제목","ph":"예: 연말 정보보호 점검"},{"k":"d1","l":"날짜","sub":"선택","type":"date","half":1,"tok":"nWhen"},{"k":"t1","l":"시간","sub":"선택","type":"time","half":1,"tok":"nWhen"},{"k":"target","l":"대상","ph":"예: 전 임직원"},{"k":"content","l":"주요 내용","sub":"한 줄에 한 항목","type":"textarea","ph":"예:\n개인 PC 보안 프로그램 업데이트\n미사용 계정 정리"},{"k":"contact","l":"문의처","ph":"예: 정보보호팀 (내선 2041)"}],
+   "rows":[{"l":"일시","tok":"nWhen","opt":1},{"l":"대상","tok":"target"},{"l":"주요 내용","tok":"content","list":1},{"l":"문의처","tok":"contact"}],
+   "subj":["[공지] {nTitle} 안내","[안내] {nTitle} 관련 공지","[사내 공지] {nTitle}"],
+   "intro":{"formal":["{nTitle} 관련하여 아래와 같이 안내드리오니 업무에 참고하시기 바랍니다.","{nTitle}에 대해 다음과 같이 공지드립니다.","임직원 여러분께 {nTitle} 관련 사항을 안내드립니다."],"brief":["{nTitle} 안내드립니다.","{nTitle} 관련 공지입니다.","{nTitle}, 아래 내용 확인 부탁드립니다."]},
+   "chips":[{"id":"coop","label":"협조 요청 강조","on":1,"text":"※ 원활한 진행을 위해 각 부서의 적극적인 협조 부탁드립니다."},{"id":"change","label":"변경 사항 강조","text":"※ 기존 안내와 달라진 부분이 있으니 반드시 확인 바랍니다."},{"id":"share","label":"팀 내 공유 요청","text":"※ 각 팀장님께서는 팀원들에게 내용 공유 부탁드립니다."},{"id":"must","label":"필수 이행 안내","text":"※ 대상자는 기한 내 반드시 완료해 주시기 바랍니다."}],
+   "closeLead":{"formal":[""],"brief":[""]}},
+  "recruit":{"name":"교육·행사 모집","when":"dt","whenLabel":"일시",
+   "fields":[{"k":"nTitle","l":"교육·행사명","ph":"예: 하반기 데이터 분석 교육"},{"k":"d1","l":"날짜","type":"date","half":1,"tok":"nWhen"},{"k":"t1","l":"시간","type":"time","half":1,"tok":"nWhen"},{"k":"place","l":"장소","ph":"예: 본사 5층 교육장"},{"k":"target","l":"대상","ph":"예: 희망 임직원 (선착순 30명)"},{"k":"content","l":"교육·행사 내용","sub":"한 줄에 한 항목","type":"textarea","ph":"예:\n엑셀 데이터 정리 실습\n대시보드 기초"},{"k":"apply","l":"신청 방법","ph":"예: 사내 포털 > 교육 신청","half":1},{"k":"applyDue","l":"신청 마감","type":"date","half":1},{"k":"contact","l":"문의처","ph":"예: 인재개발팀 (내선 1123)"}],
+   "rows":[{"l":"일시","tok":"nWhen"},{"l":"장소","tok":"place","opt":1},{"l":"대상","tok":"target"},{"l":"내용","tok":"content","list":1},{"l":"신청 방법","tok":"apply"},{"l":"신청 마감","tok":"applyDue"},{"l":"문의처","tok":"contact"}],
+   "subj":["[모집] {nTitle} 참가자 모집 안내","[교육 안내] {nTitle} 신청 안내","[모집] {nTitle} 참여 신청 받습니다"],
+   "intro":{"formal":["{nTitle} 참가자를 아래와 같이 모집하오니 많은 관심 부탁드립니다.","임직원 여러분의 역량 강화를 위해 {nTitle} 과정을 다음과 같이 운영합니다.","{nTitle} 참여 신청을 아래와 같이 받습니다."],"brief":["{nTitle} 참가자 모집합니다.","{nTitle} 신청 받습니다!","{nTitle} 참여하실 분 신청해 주세요."]},
+   "chips":[{"id":"first","label":"선착순 마감","on":1,"text":"※ 정원이 한정되어 있어 선착순으로 마감될 수 있습니다."},{"id":"approve","label":"팀장 승인 필요","text":"※ 신청 전 소속 팀장님의 승인을 받아 주시기 바랍니다."},{"id":"cancel","label":"불참 시 취소 안내","text":"※ 불참 시 신청 마감일 전까지 취소해 주시기 바랍니다."},{"id":"online","label":"온라인 참여 가능","text":"※ 현장 참석이 어려운 분은 온라인으로도 참여하실 수 있습니다."}],
+   "closeLead":{"formal":["많은 관심과 참여 부탁드립니다.","여러분의 적극적인 참여를 기다리겠습니다."],"brief":["많은 참여 부탁드려요!","관심 있는 분들의 신청 기다립니다."]}},
+  "maint":{"name":"시스템 점검","when":"range","whenLabel":"점검 일시",
+   "fields":[{"k":"nTitle","l":"점검 시스템","ph":"예: 그룹웨어"},{"k":"d1","l":"시작일","type":"date","half":1,"tok":"nWhen"},{"k":"t1","l":"시작 시간","type":"time","half":1,"tok":"nWhen"},{"k":"d2","l":"종료일","type":"date","half":1,"tok":"nWhen"},{"k":"t2","l":"종료 시간","type":"time","half":1,"tok":"nWhen"},{"k":"target","l":"영향 범위","ph":"예: 메일·전자결재 전체"},{"k":"content","l":"점검 내용","sub":"한 줄에 한 항목","type":"textarea","ph":"예:\n서버 보안 패치 적용\n데이터베이스 정기 백업"},{"k":"contact","l":"문의처","ph":"예: IT지원팀 (내선 3000)"}],
+   "rows":[{"l":"점검 일시","tok":"nWhen"},{"l":"영향 범위","tok":"target"},{"l":"점검 내용","tok":"content","list":1},{"l":"문의처","tok":"contact"}],
+   "subj":["[공지] {nTitle} 정기 점검 안내","[점검] {nTitle} 서비스 일시 중단 안내","[공지] {nTitle} 시스템 점검 일정"],
+   "intro":{"formal":["보다 안정적인 서비스 제공을 위해 {nTitle} 점검을 아래와 같이 실시합니다.","{nTitle} 시스템 점검이 예정되어 있어 사전 안내드립니다.","서비스 품질 향상을 위한 {nTitle} 점검 작업을 다음과 같이 진행할 예정입니다."],"brief":["{nTitle} 점검 예정입니다.","{nTitle} 점검 안내드립니다.","{nTitle} 점검 시간 확인 부탁드립니다."]},
+   "chips":[{"id":"stop","label":"서비스 중단 강조","on":1,"text":"※ 점검 시간 동안 서비스 접속이 일시 중단됩니다."},{"id":"save","label":"사전 저장 권고","on":1,"text":"※ 작업 중인 문서는 점검 시작 전 반드시 저장해 주시기 바랍니다."},{"id":"early","label":"조기 종료 가능","text":"※ 작업 상황에 따라 점검이 조기 종료될 수 있습니다."},{"id":"extend","label":"연장 가능성 안내","text":"※ 점검 상황에 따라 종료 시간이 다소 연장될 수 있습니다."}],
+   "closeLead":{"formal":["이용에 불편을 드려 양해 부탁드립니다.","보다 안정적인 서비스로 보답하겠습니다."],"brief":["이용에 참고 부탁드립니다.","불편 드려 죄송합니다."]}},
+  "holiday":{"name":"휴무·일정 변경","when":"days","whenLabel":"휴무 기간",
+   "fields":[{"k":"nTitle","l":"휴무·변경 사유","ph":"예: 창립기념일"},{"k":"d1","l":"시작일","type":"date","half":1,"tok":"nWhen"},{"k":"d2","l":"종료일","type":"date","half":1,"tok":"nWhen"},{"k":"target","l":"대상","ph":"예: 전 임직원"},{"k":"content","l":"변경 사항","sub":"한 줄에 한 항목","type":"textarea","ph":"예:\n해당일 전사 휴무\n고객 문의는 휴무 후 순차 응대"},{"k":"contact","l":"문의처","ph":"예: 경영지원팀 (내선 1000)"}],
+   "rows":[{"l":"휴무 기간","tok":"nWhen"},{"l":"대상","tok":"target"},{"l":"변경 사항","tok":"content","list":1},{"l":"문의처","tok":"contact"}],
+   "subj":["[공지] {nTitle} 휴무 안내","[안내] {nTitle} 업무 일정 변경","[공지] {nTitle} 휴무 및 업무 일정"],
+   "intro":{"formal":["{nTitle} 관련하여 휴무 및 업무 일정을 아래와 같이 안내드립니다.","{nTitle}에 따라 다음과 같이 휴무를 실시합니다.","{nTitle} 기간 중 업무 일정 변경 사항을 공지드립니다."],"brief":["{nTitle} 휴무 안내입니다.","{nTitle} 일정 변경 공지드립니다.","{nTitle} 휴무 일정 확인해 주세요."]},
+   "chips":[{"id":"resume","label":"업무 재개일 강조","on":1,"text":"※ {resume}부터 정상 업무가 재개됩니다."},{"id":"emergency","label":"긴급 연락처 안내","text":"※ 휴무 기간 중 긴급 사항은 문의처로 연락 바랍니다."},{"id":"queue","label":"접수 건 처리 안내","text":"※ 휴무 기간 중 접수된 건은 업무 재개 후 순차적으로 처리됩니다."},{"id":"handover","label":"업무 인수인계 요청","text":"※ 휴무 전 진행 중인 업무는 담당자 간 인수인계 부탁드립니다."}],
+   "closeLead":{"formal":["즐거운 휴일 보내시기 바랍니다.","휴무 전 업무 마무리에 유의해 주시기 바랍니다."],"brief":["좋은 휴일 보내세요!","휴무 전 업무 정리 부탁드려요."]}}
+ }
+}
+}
+</script>
+
+<script>
+{
+const D=JSON.parse(document.getElementById('tpl').textContent);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DOW='일월화수목금토';
+const pd=v=>{if(!v)return null;const d=new Date(v+'T00:00:00');return isNaN(d)?null:d};
+const fD=v=>{const d=pd(v);return d?`${d.getMonth()+1}월 ${d.getDate()}일(${DOW[d.getDay()]})`:''};
+const fT=v=>{if(!v)return'';const[h,m]=v.split(':').map(Number);if(isNaN(h))return'';return `${h<12?'오전':'오후'} ${h%12||12}시${m?` ${m}분`:''}`};
+const fDT=(d,t)=>[fD(d),fT(t)].filter(Boolean).join(' ');
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const clone=o=>JSON.parse(JSON.stringify(o));
+const ls={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+const SAMPLE={to:'김민수 팀장님',toEmail:'',proj:'2027 브랜드 리뉴얼',
+ cands:[{d:'2026-12-03',t:'14:00'},{d:'2026-12-04',t:'10:00'}],
+ oldDate:'2026-12-04',newDate:'2026-12-11',mDate:'2026-12-03',mTime:'14:00',place:'본사 3층 대회의실',link:'',
+ 'files.email':'1차_시안.pdf','files.notice':'',due:'2026-11-27',
+ 'memo.schedule':'','memo.request':'- 단가 견적서 (수량 500개 기준)\n- 제품 사양서 및 납품 가능 일정',
+ 'memo.delay':'외부 협력사의 원자재 수급이 늦어지면서 생산 일정이 1주가량 밀렸습니다.',
+ 'memo.remind':'- 1차 시안 리뷰\n- 일정 및 역할 분담 확정','memo.coop':'- 신규 랜딩 페이지 QA 인력 2명 지원\n- 12월 둘째 주 테스트 일정 공유',
+ 'internal.nTitle':'연말 정보보호 점검','internal.d1':'2026-12-07','internal.t1':'','internal.target':'전 임직원',
+ 'internal.content':'개인 PC 보안 프로그램 업데이트\n미사용 계정 및 공유 폴더 정리\n점검 결과는 팀별로 회신','internal.contact':'정보보호팀 박서준 (내선 2041)',
+ 'recruit.nTitle':'하반기 데이터 분석 교육','recruit.d1':'2026-12-10','recruit.t1':'14:00','recruit.place':'본사 5층 교육장',
+ 'recruit.target':'희망 임직원 (선착순 30명)','recruit.content':'엑셀 데이터 정리 실습\n대시보드 기초 만들기',
+ 'recruit.apply':'사내 포털 > 교육 신청','recruit.applyDue':'2026-12-04','recruit.contact':'인재개발팀 최유나 (내선 1123)',
+ 'maint.nTitle':'그룹웨어','maint.d1':'2026-12-06','maint.t1':'22:00','maint.d2':'2026-12-07','maint.t2':'06:00',
+ 'maint.target':'메일·전자결재 전체','maint.content':'서버 보안 패치 적용\n데이터베이스 정기 백업','maint.contact':'IT지원팀 (내선 3000)',
+ 'holiday.nTitle':'창립기념일','holiday.d1':'2026-12-18','holiday.d2':'2026-12-18','holiday.target':'전 임직원',
+ 'holiday.content':'해당일 전사 휴무\n고객 문의는 업무 재개 후 순차 응대','holiday.contact':'경영지원팀 (내선 1000)'};
+const SIG_SAMPLE={name:'이지은',title:'매니저',dept:'마케팅팀',company:'',phone:'010-1234-5678',email:'jieun@example.com'};
+const DEF=()=>({mode:'email',sit:{email:'schedule',notice:'internal'},tone:'formal',aud:'ext',fmt:'board',f:clone(SAMPLE),chips:{},tg:{'attach.email':true,'attach.notice':false,due:false,sig:true},v:{subj:0,greet:0,intro:0,core:0,close:0}});
+const norm=s=>{const b=DEF();s=s||{};return {...b,...s,sit:{...b.sit,...(s.sit||{})},f:{...b.f,...(s.f||{})},tg:{...b.tg,...(s.tg||{})},v:{...b.v,...(s.v||{})},chips:{...(s.chips||{})}}};
+let st=norm(ls.get('mailgen-v2',null));
+let sig={...SIG_SAMPLE,...ls.get('mailgen-sig',{})};
+let cur={s:'',b:''},ed=null,hot=null,hotT,libTab='recent';
+
+const sitKey=()=>st.sit[st.mode];
+const S=()=>D[st.mode].sits[sitKey()];
+const chipKey=()=>st.mode+'.'+sitKey();
+const chipsOn=()=>st.chips[chipKey()]||S().chips.filter(c=>c.on).map(c=>c.id);
+const pick=(arr,k)=>{const n=arr.length;return arr[((st.v[k]||0)%n+n)%n]};
+const filled=()=>(st.f.cands||[]).filter(c=>c.d);
+const nf=x=>(st.f[sitKey()+'.'+x]||'').trim();
+const nlab=x=>{const d=(S().fields||[]).find(d=>d.k===x);return d?d.l:x};
+const V=(v,l,g)=>v?{t:v,kind:'v',g}:{t:'['+l+']',kind:'p'};
+const has=k=>{const r=R(k);return !!r&&r.kind==='v'};
+const season=()=>D.season[String(new Date().getMonth()+1)];
+
+function sigLines(){
+ const c=x=>(sig[x]||'').trim();
+ return [[c('name'),c('title')].filter(Boolean).join(' '),[c('dept'),c('company')].filter(Boolean).join(' | '),[c('phone')&&'T. '+c('phone'),c('email')&&'E. '+c('email')].filter(Boolean).join('  ·  ')];
+}
+function sigBlock(){
+ const L=sigLines().map((x,i)=>x?`{sig${i+1}}`:null).filter(Boolean);
+ return '────────────\n'+(L.length?L.join('\n'):'{sig0}');
+}
+function nWhen(){
+ const w=S().when,d1=nf('d1'),d2=nf('d2');
+ if(w==='range'){const s=fDT(d1,nf('t1'));const e=d2&&d2!==d1?fDT(d2,nf('t2')):fT(nf('t2'));return s&&e?`${s} ~ ${e}`:s}
+ if(w==='days'){if(!d1)return'';if(d2&&d2>d1){const n=Math.round((pd(d2)-pd(d1))/864e5)+1;return `${fD(d1)} ~ ${fD(d2)} (${n}일간)`}return fD(d1)}
+ return fDT(d1,nf('t1'));
+}
+function resume(){
+ const b=pd(nf('d2')||nf('d1'));if(!b)return'';
+ const d=new Date(b);d.setDate(d.getDate()+1);while(d.getDay()===0||d.getDay()===6)d.setDate(d.getDate()+1);
+ return fD(iso(d));
+}
+function R(k){
+ const f=st.f,em=st.mode==='email';
+ switch(k){
+  case 'to':{const v=(f.to||'').trim();return v?{t:v,kind:'v',g:'to'}:{t:D.aud[st.aud].defTo,kind:'n'}}
+  case 'proj':return V((f.proj||'').trim(),'프로젝트명','proj');
+  case 'memo':return V((f['memo.'+sitKey()]||'').trim(),S().memoName,'memo');
+  case 'cands':{const c=filled();if(!c.length)return V('','후보 일정');return {t:c.length===1?fDT(c[0].d,c[0].t):c.map((x,i)=>`${i+1}) ${fDT(x.d,x.t)}`).join('\n'),kind:'v',g:'cands'}}
+  case 'oldDate':return V(fD(f.oldDate),'기존 마감일','oldDate');
+  case 'newDate':return V(fD(f.newDate),'변경 예정일','newDate');
+  case 'when':return V(fDT(f.mDate,f.mTime),'미팅 일시','when');
+  case 'place':return em?V((f.place||'').trim(),'장소','place'):V(nf('place'),nlab('place'),'place');
+  case 'link':return V((f.link||'').trim(),'화상회의 링크','link');
+  case 'files':return V((f['files.'+st.mode]||'').trim(),'파일명','files');
+  case 'due':return V(fD(f.due),'회신 기한','due');
+  case 'sender':{const n=(sig.name||'').trim();if(!n)return V('','보내는 사람');return {t:st.aud==='team'?n:[(sig.dept||'').trim(),n].filter(Boolean).join(' '),kind:'v',g:'sig'}}
+  case 'issuer':return V(((sig.dept||'').trim()||(sig.name||'').trim()),'발신 부서','sig');
+  case 'sig0':return V('','서명 정보 입력');
+  case 'sig1':case 'sig2':case 'sig3':{const t=sigLines()[+k[3]-1];return t?{t,kind:'v',g:'sig'}:{t:'',kind:'n'}}
+  case 'nWhen':return V(nWhen(),S().whenLabel,'nWhen');
+  case 'applyDue':return V(fD(nf('applyDue')),'신청 마감','applyDue');
+  case 'resume':return V(resume(),'업무 재개일','nWhen');
+  case 'content':{
+   const pre={board:'  - ',slack:'    ◦ ',kakao:'   · '}[st.fmt];
+   const L=nf('content').split('\n').map(s=>s.replace(/^\s*[-•·◦*▶■]\s*/,'').trim()).filter(Boolean);
+   return L.length?{t:L.map(x=>pre+x).join('\n'),kind:'v',g:'content'}:{t:pre+'['+nlab('content')+']',kind:'p'}}
+  case 'nTitle':case 'target':case 'apply':case 'contact':return V(nf(k),nlab(k),k);
+ }
+ return null;
+}
+function fill(tpl,html){
+ tpl=tpl.replace(/%s%/g,season());
+ return tpl.split(/\{(\w+)\}/).map((p,i)=>{
+  if(i%2===0)return html?esc(p):p;
+  const r=R(p);
+  if(!r)return html?esc('{'+p+'}'):'{'+p+'}';
+  if(!html)return r.t;
+  if(r.kind==='v')return `<mark data-g="${r.g}"${r.g===hot?' class="hot"':''}>${esc(r.t)}</mark>`;
+  if(r.kind==='p')return `<span class="ph">${esc(r.t)}</span>`;
+  return esc(r.t);
+ }).join('');
+}
+
+function buildEmail(){
+ const s=S(),t=st.tone,a=st.aud,on=chipsOn(),P=[];
+ const subj=pick(s.subj[t],'subj');
+ P.push(pick(D.greet[a][t],'greet'));
+ P.push(pick(s.intro[t],'intro'));
+ let core=pick((s.coreMulti&&filled().length>1?s.coreMulti:s.core)[t],'core');
+ if(sitKey()==='remind'){
+  const L=['· 일시: {when}'],hl=has('link');
+  if(has('place')||!hl)L.push('· 장소: {place}');
+  if(hl)L.push('· 화상회의: {link}');
+  core+='\n'+L.join('\n');
+ }
+ P.push(core);
+ if(s.memoMode==='opt'&&has('memo'))P.push('{memo}');
+ const cs=s.chips.filter(c=>on.includes(c.id)).map(c=>c[t]);
+ cs.filter(x=>x.includes('\n')).forEach(x=>P.push(x));
+ const one=cs.filter(x=>!x.includes('\n'));if(one.length)P.push(one.join('\n'));
+ if(st.tg['attach.email'])P.push(D.opt.attach[t]+(has('files')?'\n'+D.opt.files:''));
+ if(st.tg.due)P.push(D.opt.due[t]);
+ P.push([pick(s.closeLead[t],'close'),pick(D.close[a][t],'close')].filter(Boolean).join('\n'));
+ if(st.tg.sig)P.push(sigBlock());
+ return {s:subj,b:P.filter(Boolean).join('\n\n')};
+}
+function buildNotice(){
+ const s=S(),t=st.tone,fm=st.fmt,on=chipsOn(),N=D.notice;
+ const subj=pick(s.subj,'subj');
+ const greet=pick(N.greet[t],'greet'),intro=pick(s.intro[t],'intro'),lead=pick(N.lead[t],'core');
+ const rows=s.rows.filter(r=>!r.opt||has(r.tok)).map(r=>{
+  const tk='{'+r.tok+'}';
+  if(fm==='slack')return r.list?`• *${r.l}*\n${tk}`:`• *${r.l}*: ${tk}`;
+  if(fm==='kakao')return r.list?`▶ ${r.l}\n${tk}`:`▶ ${r.l}: ${tk}`;
+  return r.list?`■ ${r.l}\n${tk}`:`■ ${r.l}: ${tk}`;
+ }).join('\n');
+ const notes=s.chips.filter(c=>on.includes(c.id)).map(c=>c.text);
+ if(st.tg['attach.notice'])notes.push(has('files')?D.opt.nFiles:D.opt.nAttach[t]);
+ const close=[pick(s.closeLead[t],'close'),pick(N.close[t],'close')].filter(Boolean).join(' ');
+ let P;
+ if(fm==='slack')P=['*'+subj+'*',greet+' '+intro,rows,notes.map(n=>'> '+n).join('\n'),close];
+ else if(fm==='kakao')P=['📢 '+subj,greet+'\n'+intro,lead+'\n'+rows,notes.join('\n'),close,'- {issuer} -'];
+ else P=[greet+'\n'+intro,lead+'\n\n'+rows,notes.join('\n'),close,'{issuer} 드림',st.tg.sig?sigBlock():''];
+ return {s:subj,b:P.filter(Boolean).join('\n\n')};
+}
+
+/* ---------- form ---------- */
+function one(d){
+ if(d.type==='cands')return candsHTML();
+ const id='f_'+d.k.replace(/\W/g,'_'),v=esc(st.f[d.k]||'');
+ const a=`id="${id}" data-k="${d.k}" data-tok="${d.tok||d.k}" placeholder="${esc(d.ph||'')}"`;
+ return `<label class="f" for="${id}"><span>${esc(d.l)}${d.sub?` <small>${esc(d.sub)}</small>`:''}</span>${d.type==='textarea'?`<textarea ${a}>${v}</textarea>`:`<input type="${d.type||'text'}" ${a} value="${v}" autocomplete="off">`}</label>`;
+}
+function fieldsHTML(defs){
+ let h='',i=0;
+ while(i<defs.length){const d=defs[i];
+  if(d.half&&defs[i+1]&&defs[i+1].half){h+=`<div class="row2">${one(d)}${one(defs[i+1])}</div>`;i+=2}
+  else{h+=one(d);i++}}
+ return h;
+}
+function candsHTML(){
+ const c=st.f.cands=st.f.cands&&st.f.cands.length?st.f.cands:[{d:'',t:''}];
+ return `<div class="f"><span>후보 일정 <small>최대 3개</small></span>${c.map((x,i)=>`<div class="cand"><b>${i+1}</b><input type="date" data-ci="${i}" data-cf="d" value="${esc(x.d)}" aria-label="후보 ${i+1} 날짜"><input type="time" data-ci="${i}" data-cf="t" value="${esc(x.t)}" aria-label="후보 ${i+1} 시간">${c.length>1?`<button type="button" class="x" data-crm="${i}" aria-label="후보 ${i+1} 삭제">×</button>`:'<span></span>'}</div>`).join('')}${c.length<3?'<button type="button" class="add" data-cadd>+ 후보 일정 추가</button>':''}</div>`;
+}
+function buildDyn(){
+ const M=D[st.mode],s=S();
+ $('sitSeg').innerHTML=M.order.map(k=>`<button type="button" data-sit="${k}">${esc(M.sits[k].name)}</button>`).join('');
+ let defs;
+ if(st.mode==='email'){
+  const F=D.emailFields;
+  defs=['to','toEmail','proj'].map(k=>({k,...F[k]}));
+  s.fields.forEach(k=>defs.push(k==='cands'?{type:'cands'}:{k,...F[k]}));
+  defs.push({k:'memo.'+sitKey(),l:s.memoLabel,sub:s.memoMode==='chip'?'칩으로 포함 여부 선택':s.memoSub,ph:s.memoPh,type:'textarea',tok:'memo'});
+ }else defs=s.fields.map(d=>({...d,k:sitKey()+'.'+d.k,tok:d.tok||d.k}));
+ $('fields').innerHTML=fieldsHTML(defs);
+ $('chips').innerHTML=s.chips.map(c=>`<button type="button" data-chip="${c.id}">${esc(c.label)}</button>`).join('');
+ syncUI();
+}
+function syncUI(){
+ const em=st.mode==='email',on=chipsOn();
+ const set=(sel,attr,val)=>document.querySelectorAll(sel).forEach(b=>b.setAttribute('aria-pressed',String(b.dataset[attr]===val)));
+ set('[data-mode]','mode',st.mode);set('[data-sit]','sit',sitKey());set('[data-aud]','aud',st.aud);
+ set('[data-tone]','tone',st.tone);set('[data-fmt]','fmt',st.fmt);set('[data-lib]','lib',libTab);
+ document.querySelectorAll('[data-chip]').forEach(b=>b.setAttribute('aria-pressed',String(on.includes(b.dataset.chip))));
+ $('audWrap').hidden=!em;$('fmtWrap').hidden=em;$('tgDue').hidden=!em;
+ const tk=k=>k==='attach'?'attach.'+st.mode:k;$('filesIn').dataset.k='files.'+st.mode;
+ document.querySelectorAll('[data-tg]').forEach(i=>{i.checked=!!st.tg[tk(i.dataset.tg)]});
+ document.querySelectorAll('[data-show]').forEach(x=>{x.hidden=!st.tg[tk(x.dataset.show)]});
+ document.querySelectorAll('.tgx [data-k]').forEach(i=>{if(document.activeElement!==i)i.value=st.f[i.dataset.k]||''});
+ document.querySelectorAll('[data-sig]').forEach(i=>{if(document.activeElement!==i)i.value=sig[i.dataset.sig]||''});
+ $('sigSum').textContent=sigLines().filter(Boolean).slice(0,2).join(' · ')||'아직 입력 전';
+}
+
+/* ---------- preview ---------- */
+const SHUF=[['subj','제목'],['greet','인사말'],['intro','본론 도입'],['core','핵심 내용'],['close','맺음말']];
+$('shuf').insertAdjacentHTML('beforeend',SHUF.map(([k,l])=>`<button type="button" data-shuf="${k}" title="${l}만 다른 표현으로 바꾸기">${l}</button>`).join(''));
+function tagText(){
+ const t=st.tone==='formal'?'격식':'실무';
+ return st.mode==='email'?`${S().name} · ${D.aud[st.aud].name} · ${t}`:`공지 · ${S().name} · ${D.notice.fmtName[st.fmt]} · ${t}`;
+}
+function mailHref(){
+ const s=ed?ed.s:cur.s,b=ed?ed.b:cur.b,to=st.mode==='email'?(st.f.toEmail||'').trim():'';
+ return `mailto:${encodeURIComponent(to).replace(/%40/g,'@')}?subject=${encodeURIComponent(s)}&body=${encodeURIComponent(b.replace(/\n/g,'\r\n'))}`;
+}
+function render(){
+ const o=st.mode==='email'?buildEmail():buildNotice();
+ cur={s:fill(o.s,false),b:fill(o.b,false)};
+ $('subj').innerHTML=fill(o.s,true);$('body').innerHTML=fill(o.b,true);
+ $('tag').textContent=tagText();
+ if(st.mode==='email'){
+  const em=(st.f.toEmail||'').trim();
+  $('meta').innerHTML=`<dt>받는 사람</dt><dd>${fill('{to}',true)}${em?` &lt;${esc(em)}&gt;`:''}</dd><dt>보내는 사람</dt><dd>${fill('{sender}',true)}</dd>`;
+ }else $('meta').innerHTML=`<dt>게시 채널</dt><dd>${esc(D.notice.fmtName[st.fmt])}</dd><dt>발신</dt><dd>${fill('{issuer}',true)}</dd>`;
+ const E=!!ed;
+ $('subj').hidden=E;$('eSubj').hidden=!E;$('body').hidden=E;$('eBody').hidden=!E;$('banner').hidden=!E;$('editBtn').hidden=E;
+ $('dice').disabled=E;document.querySelectorAll('[data-shuf]').forEach(b=>b.disabled=E);
+ $('mailto').href=mailHref();
+ ls.set('mailgen-v2',st);
+}
+function grow(){const t=$('eBody');t.style.height='auto';t.style.height=Math.max(420,t.scrollHeight+4)+'px'}
+function startEdit(){ed={s:cur.s,b:cur.b};$('eSubj').value=ed.s;$('eBody').value=ed.b;render();grow();$('eBody').focus()}
+function setHot(g){hot=g;clearTimeout(hotT);hotT=setTimeout(()=>{hot=null;document.querySelectorAll('mark.hot').forEach(m=>m.classList.remove('hot'))},1500)}
+
+/* ---------- toast / copy ---------- */
+let toastT;
+function toast(msg,act,fn){
+ $('toastMsg').textContent=msg;const b=$('toastAct');b.hidden=!act;b.textContent=act||'';b.onclick=()=>{fn&&fn();$('toast').classList.remove('on')};
+ $('toast').classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>$('toast').classList.remove('on'),act?5000:2200);
+}
+function fallbackCopy(text){const ta=document.createElement('textarea');ta.value=text;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:-1000px;opacity:0';document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}ta.remove();return ok}
+function copy(btn,text,after){
+ const orig=btn.dataset.o||(btn.dataset.o=btn.textContent);
+ const done=ok=>{btn.textContent=ok?'복사됨 ✓':'복사 실패';btn.classList.toggle('done',ok);clearTimeout(btn._t);btn._t=setTimeout(()=>{btn.textContent=orig;btn.classList.remove('done')},1500);if(ok&&after)after()};
+ try{navigator.clipboard.writeText(text).then(()=>done(true),()=>done(fallbackCopy(text)))}catch(e){done(fallbackCopy(text))}
+}
+
+/* ---------- library ---------- */
+function addRecent(){
+ const s=ed?ed.s:cur.s,b=ed?ed.b:cur.b;
+ let r=ls.get('mailgen-recent',[]).filter(x=>!(x.s===s&&x.b===b));
+ r.unshift({id:Date.now(),s,b,ed:!!ed,label:tagText(),snap:clone(st)});
+ ls.set('mailgen-recent',r.slice(0,5));renderLib();
+}
+const when=id=>{const d=new Date(id);return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`};
+function renderLib(){
+ syncUI();
+ if(libTab==='recent'){
+  const r=ls.get('mailgen-recent',[]);
+  $('libBody').innerHTML=r.length?`<div class="list">${r.map(x=>`<div class="item"><button type="button" class="go" data-rec="${x.id}"><b>${esc(x.s)}</b><span>${esc(x.label)} · ${when(x.id)}${x.ed?' · 수정본':''}</span></button></div>`).join('')}</div>`:'<p class="empty">본문을 복사하거나 메일 앱으로 열면 최근 5건이 여기에 쌓입니다.</p>';
+ }else{
+  const p=ls.get('mailgen-presets',[]);
+  $('libBody').innerHTML=`<form class="save" id="presetForm"><input id="presetName" placeholder="프리셋 이름 (예: A사 월간 미팅)" aria-label="프리셋 이름" maxlength="40"><button type="submit">현재 설정 저장</button></form>`+
+   (p.length?`<div class="list">${p.map(x=>`<div class="item"><button type="button" class="go" data-pre="${x.id}"><b>${esc(x.name)}</b><span>${esc(x.label)}</span></button><button type="button" class="x" data-predel="${x.id}" aria-label="${esc(x.name)} 삭제">×</button></div>`).join('')}</div>`:'<p class="empty">자주 쓰는 수신자·상황·옵션 조합을 저장해 두고 한 번에 불러오세요.</p>');
+ }
+}
+function restore(snap,edit){
+ st=norm(clone(snap));ed=edit||null;
+ if(ed){$('eSubj').value=ed.s;$('eBody').value=ed.b}
+ buildDyn();render();if(ed)grow();
+}
+
+/* ---------- events ---------- */
+$('modes').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(!b||b.dataset.mode===st.mode)return;st.mode=b.dataset.mode;buildDyn();render()});
+$('form').addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+ if(d.sit){st.sit[st.mode]=d.sit;buildDyn();render()}
+ else if(d.aud){st.aud=d.aud;syncUI();render()}
+ else if(d.tone){st.tone=d.tone;syncUI();render()}
+ else if(d.fmt){st.fmt=d.fmt;syncUI();render()}
+ else if(d.chip){const l=[...chipsOn()],i=l.indexOf(d.chip);i<0?l.push(d.chip):l.splice(i,1);st.chips[chipKey()]=l;syncUI();render()}
+ else if('cadd' in d){st.f.cands.push({d:'',t:''});buildDyn();render();const n=document.querySelectorAll('[data-ci][data-cf=d]');n[n.length-1].focus()}
+ else if(d.crm){st.f.cands.splice(+d.crm,1);buildDyn();render()}
+ else if(b.id==='clear'){
+  const prev=clone(st.f);
+  Object.keys(st.f).forEach(k=>{st.f[k]=k==='cands'?[{d:'',t:''}]:''});
+  buildDyn();render();toast('입력값을 모두 지웠습니다.','되돌리기',()=>{st.f=prev;buildDyn();render()});
+ }
+});
+$('form').addEventListener('input',e=>{
+ const t=e.target,d=t.dataset;
+ if(d.k){st.f[d.k]=t.value;setHot(d.tok||d.k);render()}
+ else if(d.ci!==undefined){st.f.cands[+d.ci][d.cf]=t.value;setHot('cands');render()}
+ else if(d.sig){sig[d.sig]=t.value;ls.set('mailgen-sig',sig);setHot('sig');$('sigSum').textContent=sigLines().filter(Boolean).slice(0,2).join(' · ')||'아직 입력 전';render()}
+});
+$('form').addEventListener('change',e=>{const d=e.target.dataset;if(d.tg){st.tg[d.tg==='attach'?'attach.'+st.mode:d.tg]=e.target.checked;syncUI();render()}});
+
+$('dice').addEventListener('click',()=>{Object.keys(st.v).forEach(k=>st.v[k]+=1+Math.floor(Math.random()*2));render()});
+$('shuf').addEventListener('click',e=>{const b=e.target.closest('[data-shuf]');if(b&&!b.disabled){st.v[b.dataset.shuf]++;setHot(null);render()}});
+$('editBtn').addEventListener('click',startEdit);
+$('resetBtn').addEventListener('click',()=>{ed=null;render();toast('자동 생성 문구로 되돌렸습니다.')});
+$('eSubj').addEventListener('input',e=>{ed.s=e.target.value;$('mailto').href=mailHref()});
+$('eBody').addEventListener('input',e=>{ed.b=e.target.value;grow();$('mailto').href=mailHref()});
+$('cS').addEventListener('click',e=>copy(e.currentTarget,ed?ed.s:cur.s));
+$('cB').addEventListener('click',e=>copy(e.currentTarget,ed?ed.b:cur.b,()=>{addRecent();toast('본문을 복사하고 최근 기록에 저장했습니다.')}));
+$('mailto').addEventListener('click',()=>addRecent());
+
+document.querySelector('.lib').addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+ if(d.lib){libTab=d.lib;renderLib()}
+ else if(d.rec){const x=ls.get('mailgen-recent',[]).find(x=>String(x.id)===d.rec);if(x){restore(x.snap,x.ed?{s:x.s,b:x.b}:null);toast('최근 기록을 불러왔습니다.')}}
+ else if(d.pre){const x=ls.get('mailgen-presets',[]).find(x=>String(x.id)===d.pre);if(x){restore(x.snap,null);toast(`'${x.name}' 프리셋을 불러왔습니다.`)}}
+ else if(d.predel){const all=ls.get('mailgen-presets',[]),x=all.find(x=>String(x.id)===d.predel);ls.set('mailgen-presets',all.filter(y=>y!==x));renderLib();
+  if(x)toast('프리셋을 삭제했습니다.','되돌리기',()=>{ls.set('mailgen-presets',[x,...ls.get('mailgen-presets',[])]);renderLib()})}
+});
+document.querySelector('.lib').addEventListener('submit',e=>{
+ e.preventDefault();const name=($('presetName').value||'').trim()||tagText();
+ const p=ls.get('mailgen-presets',[]);p.unshift({id:Date.now(),name,label:tagText(),snap:clone(st)});ls.set('mailgen-presets',p.slice(0,20));
+ renderLib();toast('현재 설정을 프리셋으로 저장했습니다.');
+});
+
+if(!(sig.name||'').trim())$('sigBox').open=true;
+buildDyn();render();renderLib();
+}
+</script>
+</body>
+</html>

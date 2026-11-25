@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<title>{% block title %}이메일·공지문 템플릿 생성기{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+{% set nav = [('pages.generator','생성기'),('pages.history','이력'),('pages.contacts','주소록·프로젝트'),('pages.catalog_admin','문구 관리'),('pages.settings','설정')] %}
+<header><div class="in">
+  <div class="brand">
+    <h1><a href="{{ url_for('pages.generator') }}">이메일·공지문 템플릿 생성기</a></h1>
+    <p>{% block lead %}핵심 키워드만 넣으면 상황·대상·톤에 맞는 비즈니스 메일과 사내 공지가 바로 완성됩니다.{% endblock %}</p>
+  </div>
+  {% block header_extra %}{% endblock %}
+  <nav class="top" aria-label="주요 메뉴">
+    {% for ep, label in nav %}<a href="{{ url_for(ep) }}"{% if request.endpoint == ep %} aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}
+  </nav>
+</div></header>
+{% block content %}{% endblock %}
+<div class="toast" id="toast" role="status"><span id="toastMsg"></span><button type="button" id="toastAct" hidden></button></div>
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

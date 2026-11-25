@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block header_extra %}
+  <div class="modes" id="modes" role="group" aria-label="작성 모드">
+    <button type="button" data-mode="email">이메일</button>
+    <button type="button" data-mode="notice">공지문</button>
+  </div>
+{% endblock %}
+{% block content %}
+<main>
+<div class="col">
+  <section class="card form" id="form" aria-label="작성 폼">
+    <div class="sec">
+      <div class="lab">상황</div>
+      <div class="seg" id="sitSeg" role="group" aria-label="상황"></div>
+    </div>
+    <div class="sec" id="audWrap">
+      <div class="lab">수신 대상</div>
+      <div class="pill" id="audSeg" role="group" aria-label="수신 대상">
+        <button type="button" data-aud="ext">외부 거래처</button>
+        <button type="button" data-aud="dept">타 부서 협업</button>
+        <button type="button" data-aud="team">사내 팀원</button>
+      </div>
+    </div>
+    <div class="sec" id="fmtWrap">
+      <div class="lab">게시 채널</div>
+      <div class="pill" role="group" aria-label="게시 채널">
+        <button type="button" data-fmt="board">사내 게시판</button>
+        <button type="button" data-fmt="slack">슬랙</button>
+        <button type="button" data-fmt="kakao">카카오톡</button>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="lab">톤앤매너</div>
+      <div class="pill" role="group" aria-label="톤">
+        <button type="button" data-tone="formal">정중하고 격식 있는 톤</button>
+        <button type="button" data-tone="brief">간결하고 실무적인 톤</button>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="lab">내용 입력</div>
+      <div id="fields"><p class="empty">문구 데이터를 불러오는 중…</p></div>
+      <datalist id="dlContacts"></datalist>
+      <datalist id="dlProjects"></datalist>
+    </div>
+    <div class="sec">
+      <div class="lab">포함할 내용 <small>누를 때마다 문장이 추가·제거됩니다</small></div>
+      <div class="chips" id="chips"></div>
+    </div>
+    <div class="sec">
+      <div class="lab">실무 옵션</div>
+      <div class="tg">
+        <label class="sw"><input type="checkbox" data-tg="attach" id="tgAttach"><span>첨부파일 있음</span></label>
+        <div class="tgx" data-show="attach"><input id="filesIn" data-k="files.email" data-tok="files" placeholder="파일명 (여러 개는 쉼표로 구분)" aria-label="첨부 파일명" autocomplete="off" maxlength="200"></div>
+      </div>
+      <div class="tg" id="tgDue">
+        <label class="sw"><input type="checkbox" data-tg="due"><span>회신 기한 강조</span></label>
+        <div class="tgx" data-show="due"><input type="date" data-k="due" data-tok="due" aria-label="회신 기한"></div>
+      </div>
+      <div class="tg">
+        <label class="sw"><input type="checkbox" data-tg="sig"><span>내 서명 자동 삽입</span></label>
+      </div>
+    </div>
+    <div class="sec">
+      <details id="sigBox">
+        <summary>내 정보·서명 <span id="sigSum"></span></summary>
+        <div class="in">
+          <div class="row2">
+            <label class="f"><span>이름</span><input data-sig="name" placeholder="예: 이지은" autocomplete="name" maxlength="100"></label>
+            <label class="f"><span>직함</span><input data-sig="title" placeholder="예: 매니저" maxlength="100"></label>
+          </div>
+          <div class="row2">
+            <label class="f"><span>소속 부서</span><input data-sig="dept" placeholder="예: 마케팅팀" maxlength="100"></label>
+            <label class="f"><span>회사명</span><input data-sig="company" placeholder="예: (주)회사명" autocomplete="organization" maxlength="100"></label>
+          </div>
+          <div class="row2">
+            <label class="f"><span>연락처</span><input data-sig="phone" type="tel" placeholder="010-0000-0000" autocomplete="tel" maxlength="100"></label>
+            <label class="f"><span>이메일</span><input data-sig="email" type="email" placeholder="me@company.com" autocomplete="email" maxlength="100"></label>
+          </div>
+          <p class="note">입력한 서명은 서버 설정에 저장되고 이 브라우저에도 보관됩니다. 인사말의 보내는 사람 이름과 공지문 발신 부서에도 사용됩니다.</p>
+        </div>
+      </details>
+    </div>
+    <div class="foot"><span>처음에는 예시 값이 채워져 있습니다.</span><button type="button" class="ghost" id="clear">입력값 모두 지우기</button></div>
+  </section>
+
+  <section class="card lib" aria-label="최근 기록과 프리셋">
+    <div class="pill" role="group" aria-label="보관함">
+      <button type="button" data-lib="recent">최근 기록</button>
+      <button type="button" data-lib="preset">프리셋</button>
+    </div>
+    <div id="libBody"></div>
+  </section>
+</div>
+
+<section class="card preview" aria-label="미리보기">
+  <div class="bar">
+    <span class="dot"></span><b>실시간 미리보기</b><span class="tag" id="tag"></span><span class="sp"></span>
+    <button type="button" class="tool" id="dice" title="같은 조건에서 다른 표현으로 다시 만듭니다">🎲 문구 새로고침</button>
+    <button type="button" class="tool" id="editBtn">직접 수정</button>
+  </div>
+  <div class="shuf" id="shuf"><span>문단별 바꾸기</span></div>
+  <dl class="meta" id="meta"></dl>
+  <div class="banner" id="banner" hidden><span>직접 수정 중입니다. 왼쪽 입력을 바꿔도 이 내용은 유지되며, 복사·메일 열기에 수정본이 쓰입니다.</span><button type="button" class="ghost" id="resetBtn">초기화</button></div>
+  <div class="subj">
+    <h2 id="subj"></h2>
+    <input id="eSubj" hidden aria-label="제목 직접 수정">
+    <button type="button" class="copy sec2" id="cS">제목 복사</button>
+  </div>
+  <div class="body" id="body" aria-live="polite"></div>
+  <textarea id="eBody" hidden aria-label="본문 직접 수정"></textarea>
+  <div class="acts">
+    <a class="copy sec2" id="mailto" href="mailto:">메일 앱에서 열기</a>
+    <button type="button" class="copy pri" id="cB">본문 복사</button>
+  </div>
+  <p class="hint" id="hint">본문 복사·메일 열기 시 최근 기록에 자동 저장됩니다. 메일 앱이 열리지 않으면 복사해서 붙여 넣으세요.</p>
+</section>
+</main>
+<script type="application/json" id="boot">{{ boot|tojson }}</script>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/engine.js') }}"></script>
+<script src="{{ url_for('static', filename='js/library.js') }}"></script>
+<script src="{{ url_for('static', filename='js/generator.js') }}"></script>
+{% endblock %}

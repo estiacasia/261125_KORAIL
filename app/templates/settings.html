@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}설정 · 이메일·공지문 템플릿 생성기{% endblock %}
+{% block lead %}서명과 생성기 기본값을 정합니다.{% endblock %}
+{% block content %}
+<div class="page">
+  <form id="setForm" class="two">
+    <section class="card panel">
+      <h2 class="t">내 정보·서명</h2>
+      <div class="row2">
+        <label class="f"><span>이름</span><input name="name" value="{{ s.sig.name }}" maxlength="100" autocomplete="name"></label>
+        <label class="f"><span>직함</span><input name="title" value="{{ s.sig.title }}" maxlength="100"></label>
+      </div>
+      <div class="row2">
+        <label class="f"><span>소속 부서</span><input name="dept" value="{{ s.sig.dept }}" maxlength="100"></label>
+        <label class="f"><span>회사명</span><input name="company" value="{{ s.sig.company }}" maxlength="100" autocomplete="organization"></label>
+      </div>
+      <div class="row2">
+        <label class="f"><span>연락처</span><input name="phone" type="tel" value="{{ s.sig.phone }}" maxlength="100" autocomplete="tel"></label>
+        <label class="f"><span>이메일</span><input name="email" type="email" value="{{ s.sig.email }}" maxlength="100" autocomplete="email"></label>
+      </div>
+      <p class="note">값이 없는 줄은 서명에서 생략됩니다. 발신 부서가 비어 있으면 공지문에는 이름이 들어갑니다.</p>
+    </section>
+    <section class="card panel">
+      <h2 class="t">생성기 기본값</h2>
+      <p class="muted" style="margin-top:-6px">처음 열 때(또는 브라우저 저장값이 없을 때) 적용됩니다.</p>
+      {% set opts = {
+        'default_mode': ('기본 모드', [('email','이메일'),('notice','공지문')]),
+        'default_tone': ('기본 톤', [('formal','정중하고 격식 있는 톤'),('brief','간결하고 실무적인 톤')]),
+        'default_audience': ('기본 수신 대상', [('ext','외부 거래처'),('dept','타 부서 협업'),('team','사내 팀원')]),
+        'default_channel': ('기본 게시 채널', [('board','사내 게시판'),('slack','슬랙'),('kakao','카카오톡')]),
+      } %}
+      {% for key, (label, choices) in opts.items() %}
+      <label class="f"><span>{{ label }}</span>
+        <select name="{{ key }}" style="width:100%">
+          {% for v, l in choices %}<option value="{{ v }}" {% if s[key]==v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+        </select>
+      </label>
+      {% endfor %}
+      <div class="btns" style="margin-top:18px"><button class="btn" type="submit">저장</button></div>
+    </section>
+  </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  const { $, api, toast, ls } = App;
+  $('setForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const fd = new FormData(e.target), sig = {};
+    ['name', 'title', 'dept', 'company', 'phone', 'email'].forEach(k => { sig[k] = (fd.get(k) || '').trim(); });
+    const data = { sig };
+    ['default_mode', 'default_tone', 'default_audience', 'default_channel'].forEach(k => { data[k] = fd.get(k); });
+    try { const r = await api('PUT', '/api/settings', data); ls.set('mailgen-sig', r.sig); toast('설정을 저장했습니다.'); }
+    catch (err) { toast(err.message); }
+  });
+})();
+</script>
+{% endblock %}

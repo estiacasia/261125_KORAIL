@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}문구 관리 · 이메일·공지문 템플릿 생성기{% endblock %}
+{% block lead %}블록별 변주·칩·입력 필드·공지 행을 고치면 생성기 셔플 후보에 바로 반영됩니다.{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="admin">
+    <nav class="card tree" id="tree" aria-label="문구 트리"><p class="muted">불러오는 중…</p></nav>
+    <div class="col">
+      <section class="card panel" id="editor"><p class="muted">왼쪽에서 상황이나 공통 문구를 고르세요.</p></section>
+      <section class="card preview apreview" aria-label="샘플 미리보기">
+        <div class="bar"><span class="dot"></span><b>샘플 값 미리보기</b><span class="tag" id="pvTag"></span><span class="sp"></span>
+          <select id="pvAud" aria-label="미리보기 수신 대상"><option value="ext">외부 거래처</option><option value="dept">타 부서 협업</option><option value="team">사내 팀원</option></select>
+          <select id="pvFmt" aria-label="미리보기 게시 채널"><option value="board">사내 게시판</option><option value="slack">슬랙</option><option value="kakao">카카오톡</option></select>
+          <select id="pvTone" aria-label="미리보기 톤"><option value="formal">격식</option><option value="brief">실무</option></select>
+        </div>
+        <div class="subj"><h2 id="pvSubj"></h2></div>
+        <div class="body" id="pvBody" aria-live="polite"></div>
+        <p class="hint">편집 중인 문구 칸을 누르면 그 문구로 미리보기가 바뀝니다 (저장 전 내용 포함).</p>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/engine.js') }}"></script>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

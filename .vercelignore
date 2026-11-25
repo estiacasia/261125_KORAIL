@@ -1,0 +1,8 @@
+.venv
+.env
+instance
+tests
+__pycache__
+*.sqlite3*
+.claude
+supabase
