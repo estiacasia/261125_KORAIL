@@ -11,3 +11,6 @@ instance/
 supabase/.branches/
 supabase/.temp/
 .vercel/
+
+.vercel
+.env*
